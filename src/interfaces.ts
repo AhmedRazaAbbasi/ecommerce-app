@@ -24,4 +24,12 @@ export interface Product {
     };
     phone: string;
   }
+  export interface CartItem {
+    product: Product;
+    quantity: number;
+  }
   
+  export interface Order {
+    items: CartItem[];
+    total: number;
+  }
