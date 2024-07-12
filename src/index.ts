@@ -1,113 +1,113 @@
-import { GeneralAPI } from './APICall';
-import { ProductInterface, UserInterface, CartItemInterface, OrderInterface } from './interfaces';
-const readline = require('node:readline');
-const rl = readline.createInterface({
+import { GeneralAPI as ApiService } from './APICall';
+import { ProductInterface as Product, UserInterface as User, CartItemInterface as CartItem, OrderInterface as Order } from './interfaces';
+const readlineModule = require('node:readline');
+const readlineInterface = readlineModule.createInterface({
   input: process.stdin,
   output: process.stdout,
 });
-const bulkProducts = new GeneralAPI<ProductInterface>('https://fakestoreapi.com/products');
-const bulkUsers = new GeneralAPI<UserInterface>('https://fakestoreapi.com/users');
+const productApi = new ApiService<Product>('https://fakestoreapi.com/products');
+const userApi = new ApiService<User>('https://fakestoreapi.com/users');
 
-async function fetchProducts(): Promise<ProductInterface[]> {
+async function getProducts(): Promise<Product[]> {
   try {
-    const products = await bulkProducts.fetchAll();
+    const products = await productApi.fetchAll();
     return products;
-  } catch (error) {
-    console.error('Error fetching products:', error);
+  } catch (err) {
+    console.error('Error fetching products:', err);
     return [];
   }
 }
 
-async function fetchUsers(): Promise<UserInterface[]> {
+async function getUsers(): Promise<User[]> {
   try {
-    const users = await bulkUsers.fetchAll();
+    const users = await userApi.fetchAll();
     return users;
-  } catch (error) {
-    console.error('Error fetching users:', error);
+  } catch (err) {
+    console.error('Error fetching users:', err);
     return [];
   }
 }
 
-async function addProduct(newProduct: ProductInterface): Promise<ProductInterface | null> {
+async function createProduct(newProduct: Product): Promise<Product | null> {
   try {
-    const product = await bulkProducts.create(newProduct);
+    const product = await productApi.create(newProduct);
     return product;
-  } catch (error) {
-    console.error('Error adding product:', error);
+  } catch (err) {
+    console.error('Error adding product:', err);
     return null;
   }
 }
 
-async function updateProduct(id: number, updatedProduct: ProductInterface): Promise<ProductInterface | null> {
+async function modifyProduct(id: number, updatedProduct: Product): Promise<Product | null> {
   try {
-    const product = await bulkProducts.update(id, updatedProduct);
+    const product = await productApi.update(id, updatedProduct);
     return product;
-  } catch (error) {
-    console.error('Error updating product:', error);
+  } catch (err) {
+    console.error('Error updating product:', err);
     return null;
   }
 }
 
-async function deleteProduct(id: number): Promise<boolean> {
+async function removeProduct(id: number): Promise<boolean> {
   try {
-    const success = await bulkProducts.delete(id);
+    const success = await productApi.delete(id);
     return success;
-  } catch (error) {
-    console.error('Error deleting product:', error);
+  } catch (err) {
+    console.error('Error deleting product:', err);
     return false;
   }
 }
 
-const cart: CartItemInterface[] = [];
+const shoppingCart: CartItem[] = [];
 
-const addToCart = (product: ProductInterface, quantity: number) => {
-  const existingItem = cart.find(item => item.product.id === product.id);
-  if (existingItem) {
-    existingItem.quantity += quantity;
+const addProductToCart = (product: Product, quantity: number) => {
+  const existingCartItem = shoppingCart.find(item => item.product.id === product.id);
+  if (existingCartItem) {
+    existingCartItem.quantity += quantity;
   } else {
-    cart.push({ product, quantity });
+    shoppingCart.push({ product, quantity });
   }
   console.log(`${quantity} of ${product.title} added to cart.`);
 };
 
-const simulateCheckout = (): OrderInterface => {
-  const total = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
-  const order: OrderInterface = { items: cart, total };
+const processCheckout = (): Order => {
+  const totalAmount = shoppingCart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const order: Order = { items: shoppingCart, total: totalAmount };
   return order;
 };
 
-const promptUser = (query: string): Promise<string> => {
-  return new Promise(resolve => rl.question(query, resolve));
+const promptInput = (query: string): Promise<string> => {
+  return new Promise(resolve => readlineInterface.question(query, resolve));
 };
 
 (async () => {
-  const option = await promptUser(`Please select an option\n1: View all products\n2: View all users\n3: Add a product\n4: Update a product\n5: Delete a product\n`);
-  switch (option) {
+  const userOption = await promptInput(`Please select an option\n1: View all products\n2: View all users\n3: Add a product\n4: Update a product\n5: Delete a product\n`);
+  switch (userOption) {
     case "1":
-      const products = await fetchProducts();
-      console.log(products);
-      const productId = await promptUser('Enter product ID to add to cart: ');
-      const product = products.find(p => p.id === parseInt(productId));
-      if (product) {
-        const quantity = await promptUser('Enter quantity: ');
-        addToCart(product, parseInt(quantity));
-        const answer = await promptUser('Do you want to checkout? (yes/no): ');
-        if (answer.toLowerCase() === 'yes') {
-          const order = simulateCheckout();
-          console.log('Order processed:', order);
+      const allProducts = await getProducts();
+      console.log(allProducts);
+      const selectedProductId = await promptInput('Enter product ID to add to cart: ');
+      const selectedProduct = allProducts.find(p => p.id === parseInt(selectedProductId));
+      if (selectedProduct) {
+        const quantityToAdd = await promptInput('Enter quantity: ');
+        addProductToCart(selectedProduct, parseInt(quantityToAdd));
+        const checkoutAnswer = await promptInput('Do you want to checkout? (yes/no): ');
+        if (checkoutAnswer.toLowerCase() === 'yes') {
+          const orderDetails = processCheckout();
+          console.log('Order processed:', orderDetails);
         }
       } else {
         console.log('Product not found.');
       }
-      rl.close();
+      readlineInterface.close();
       break;
     case "2":
-      const users = await fetchUsers();
-      console.log(users);
-      rl.close();
+      const allUsers = await getUsers();
+      console.log(allUsers);
+      readlineInterface.close();
       break;
     case "3":
-      const newProduct: ProductInterface = {
+      const newProduct: Product = {
         id: 0,
         title: 'New Product',
         price: 29.99,
@@ -115,12 +115,12 @@ const promptUser = (query: string): Promise<string> => {
         category: 'test-category',
         image: 'https://via.placeholder.com/150'
       };
-      const addedProduct = await addProduct(newProduct);
-      console.log('Product added:', addedProduct);
-      rl.close();
+      const addedNewProduct = await createProduct(newProduct);
+      console.log('Product added:', addedNewProduct);
+      readlineInterface.close();
       break;
     case "4":
-      const updatedProduct: ProductInterface = {
+      const updatedProduct: Product = {
         id: 0,
         title: 'Updated Product',
         price: 39.99,
@@ -128,17 +128,17 @@ const promptUser = (query: string): Promise<string> => {
         category: 'updated-category',
         image: 'https://via.placeholder.com/150'
       };
-      const productToUpdate = await updateProduct(1, updatedProduct);
-      console.log('Product updated:', productToUpdate);
-      rl.close();
+      const productToModify = await modifyProduct(1, updatedProduct);
+      console.log('Product updated:', productToModify);
+      readlineInterface.close();
       break;
     case "5":
-      const success = await deleteProduct(1);
-      console.log(success ? 'Product deleted successfully.' : 'Error deleting product.');
-      rl.close();
+      const deletionSuccess = await removeProduct(1);
+      console.log(deletionSuccess ? 'Product deleted successfully.' : 'Error deleting product.');
+      readlineInterface.close();
       break;
     default:
       console.log("Invalid Input");
-      rl.close();
+      readlineInterface.close();
   }
 })();
