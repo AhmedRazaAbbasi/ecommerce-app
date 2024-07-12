@@ -1,17 +1,16 @@
-// main.ts
-import { GenericApi } from './APICall';
-import { Product, User, CartItem, Order } from './interfaces';
+import { GeneralAPI } from './APICall';
+import { ProductInterface, UserInterface, CartItemInterface, OrderInterface } from './interfaces';
 const readline = require('node:readline');
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
 });
-const productRepository = new GenericApi<Product>('https://fakestoreapi.com/products');
-const userRepository = new GenericApi<User>('https://fakestoreapi.com/users');
+const bulkProducts = new GeneralAPI<ProductInterface>('https://fakestoreapi.com/products');
+const bulkUsers = new GeneralAPI<UserInterface>('https://fakestoreapi.com/users');
 
-async function fetchProducts(): Promise<Product[]> {
+async function fetchProducts(): Promise<ProductInterface[]> {
   try {
-    const products = await productRepository.getAll();
+    const products = await bulkProducts.fetchAll();
     return products;
   } catch (error) {
     console.error('Error fetching products:', error);
@@ -19,9 +18,9 @@ async function fetchProducts(): Promise<Product[]> {
   }
 }
 
-async function fetchUsers(): Promise<User[]> {
+async function fetchUsers(): Promise<UserInterface[]> {
   try {
-    const users = await userRepository.getAll();
+    const users = await bulkUsers.fetchAll();
     return users;
   } catch (error) {
     console.error('Error fetching users:', error);
@@ -29,9 +28,9 @@ async function fetchUsers(): Promise<User[]> {
   }
 }
 
-async function addProduct(newProduct: Product): Promise<Product | null> {
+async function addProduct(newProduct: ProductInterface): Promise<ProductInterface | null> {
   try {
-    const product = await productRepository.create(newProduct);
+    const product = await bulkProducts.create(newProduct);
     return product;
   } catch (error) {
     console.error('Error adding product:', error);
@@ -39,9 +38,9 @@ async function addProduct(newProduct: Product): Promise<Product | null> {
   }
 }
 
-async function updateProduct(id: number, updatedProduct: Product): Promise<Product | null> {
+async function updateProduct(id: number, updatedProduct: ProductInterface): Promise<ProductInterface | null> {
   try {
-    const product = await productRepository.update(id, updatedProduct);
+    const product = await bulkProducts.update(id, updatedProduct);
     return product;
   } catch (error) {
     console.error('Error updating product:', error);
@@ -51,7 +50,7 @@ async function updateProduct(id: number, updatedProduct: Product): Promise<Produ
 
 async function deleteProduct(id: number): Promise<boolean> {
   try {
-    const success = await productRepository.delete(id);
+    const success = await bulkProducts.delete(id);
     return success;
   } catch (error) {
     console.error('Error deleting product:', error);
@@ -59,9 +58,9 @@ async function deleteProduct(id: number): Promise<boolean> {
   }
 }
 
-const cart: CartItem[] = [];
+const cart: CartItemInterface[] = [];
 
-const addToCart = (product: Product, quantity: number) => {
+const addToCart = (product: ProductInterface, quantity: number) => {
   const existingItem = cart.find(item => item.product.id === product.id);
   if (existingItem) {
     existingItem.quantity += quantity;
@@ -71,9 +70,9 @@ const addToCart = (product: Product, quantity: number) => {
   console.log(`${quantity} of ${product.title} added to cart.`);
 };
 
-const simulateCheckout = (): Order => {
+const simulateCheckout = (): OrderInterface => {
   const total = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
-  const order: Order = { items: cart, total };
+  const order: OrderInterface = { items: cart, total };
   return order;
 };
 
@@ -108,7 +107,7 @@ const promptUser = (query: string): Promise<string> => {
       rl.close();
       break;
     case "3":
-      const newProduct: Product = {
+      const newProduct: ProductInterface = {
         id: 0,
         title: 'New Product',
         price: 29.99,
@@ -121,7 +120,7 @@ const promptUser = (query: string): Promise<string> => {
       rl.close();
       break;
     case "4":
-      const updatedProduct: Product = {
+      const updatedProduct: ProductInterface = {
         id: 0,
         title: 'Updated Product',
         price: 39.99,
