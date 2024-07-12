@@ -81,9 +81,45 @@ const promptInput = (query: string): Promise<string> => {
 };
 
 (async () => {
-  const userOption = await promptInput(`Please select an option\n1: View all products\n2: View all users\n3: Add a product\n4: Update a product\n5: Delete a product\n`);
+  const userOption = await promptInput(`Please select an option\n1: View All Users\n2: Add New Product\n3: Update Product\n4: Delete Product \n5: View All The Products\n`);
   switch (userOption) {
     case "1":
+      const allUsers = await getUsers();
+      console.log(allUsers);
+      readlineInterface.close();
+      break;
+    case "2":
+      const newProduct: Product = {
+        id: 0,
+        title: 'New Product',
+        price: 29.99,
+        description: 'A new product for testing',
+        category: 'test-category',
+        image: 'https://via.placeholder.com/150'
+      };
+      const addedNewProduct = await createProduct(newProduct);
+      console.log('Product added:', addedNewProduct);
+      readlineInterface.close();
+      break;
+    case "3":
+      const updatedProduct: Product = {
+        id: 0,
+        title: 'Updated Product',
+        price: 39.99,
+        description: 'An updated product for testing',
+        category: 'updated-category',
+        image: 'https://via.placeholder.com/150'
+      };
+      const productToModify = await modifyProduct(1, updatedProduct);
+      console.log('Product updated:', productToModify);
+      readlineInterface.close();
+      break;
+    case "4":
+      const deletionSuccess = await removeProduct(1);
+      console.log(deletionSuccess ? 'Product deleted successfully.' : 'Error deleting product.');
+      readlineInterface.close();
+      break;
+    case "5":
       const allProducts = await getProducts();
       console.log(allProducts);
       const selectedProductId = await promptInput('Enter product ID to add to cart: ');
@@ -101,44 +137,8 @@ const promptInput = (query: string): Promise<string> => {
       }
       readlineInterface.close();
       break;
-    case "2":
-      const allUsers = await getUsers();
-      console.log(allUsers);
-      readlineInterface.close();
-      break;
-    case "3":
-      const newProduct: Product = {
-        id: 0,
-        title: 'New Product',
-        price: 29.99,
-        description: 'A new product for testing',
-        category: 'test-category',
-        image: 'https://via.placeholder.com/150'
-      };
-      const addedNewProduct = await createProduct(newProduct);
-      console.log('Product added:', addedNewProduct);
-      readlineInterface.close();
-      break;
-    case "4":
-      const updatedProduct: Product = {
-        id: 0,
-        title: 'Updated Product',
-        price: 39.99,
-        description: 'An updated product for testing',
-        category: 'updated-category',
-        image: 'https://via.placeholder.com/150'
-      };
-      const productToModify = await modifyProduct(1, updatedProduct);
-      console.log('Product updated:', productToModify);
-      readlineInterface.close();
-      break;
-    case "5":
-      const deletionSuccess = await removeProduct(1);
-      console.log(deletionSuccess ? 'Product deleted successfully.' : 'Error deleting product.');
-      readlineInterface.close();
-      break;
     default:
       console.log("Invalid Input");
       readlineInterface.close();
-  }
+  }  
 })();
