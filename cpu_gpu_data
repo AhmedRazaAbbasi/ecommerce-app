@@ -1,0 +1,14 @@
+{
+  "cpu": {
+    "Intel i5-10400": 12000,
+    "Intel i7-10700": 15000,
+    "AMD Ryzen 5 3600": 14000,
+    "AMD Ryzen 7 3700X": 17000
+  },
+  "gpu": {
+    "NVIDIA GTX 1660": 8000,
+    "NVIDIA RTX 3060": 13000,
+    "AMD RX 580": 7000,
+    "AMD RX 6700 XT": 15000
+  }
+}
